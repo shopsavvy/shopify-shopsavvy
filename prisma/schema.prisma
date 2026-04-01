@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// Stores the merchant's ShopSavvy API key per shop
+model ShopSettings {
+  id        String   @id @default(cuid())
+  shop      String   @unique
+  apiKey    String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Cached competitor price data for merchant products
+model ProductCompetitorCache {
+  id                String   @id @default(cuid())
+  shop              String
+  shopifyProductId  String
+  shopifyVariantId  String?
+  productTitle      String
+  merchantPrice     Float?
+  lowestPrice       Float?
+  lowestRetailer    String?
+  offerCount        Int      @default(0)
+  offersJson        String   @default("[]") // JSON array of offers
+  shopsavvyId       String?  // ShopSavvy product ID for re-lookups
+  lastSyncedAt      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([shop, shopifyProductId])
+  @@index([shop])
+}
